@@ -1,0 +1,153 @@
+{% extends 'users/base.html' %} {% load crispy_forms_tags %} {% block content %}
+<!--
+<form method="POST" class="form" enctype="multipart/form-data" id="v-register">
+  {% csrf_token %} {{ form.as_table }}
+  <button type="submit" class="save btn btn-primary">Save Record</button>
+</form>
+-->
+<form id ="video-form">
+  <legend> Please Record your message</legend>
+  <div class="row g-5">
+    <div class="col-md-7 col-lg-8">
+      <div class="bd-example g-3">
+        <div class="mb-3">
+          <label for="exampleFormControlInput1" class="form-label"
+            >Name</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="id_name"
+            placeholder="name"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleFormControlTextarea1" class="form-label"
+            >Mobile</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="id_mobile"
+            placeholder="mobile"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</form>
+
+<div id="container">
+  <label for="exampleFormControlTextarea1" class="form-label"
+          >Mobile</label
+        >
+  <div>
+    <button id="start" class="btn btn-primary">Start camera</button>
+    <button id="record" class="btn btn-default" disabled>Start Recording</button>
+    <button id="play" class="btn btn-default" disabled>Play</button>
+    <button id="magic" class="btn btn-primary" disabled>Submit </button>
+    <!--<button id="download" disabled>Download</button>  -->
+  </div>
+
+  <video id="gum" playsinline autoplay muted></video>
+  <video id="recorded" playsinline loop></video>
+
+
+  <div style="display: none">
+    Recording format:
+    <select id="codecPreferences" disabled></select>
+  </div>
+  <div style="display: none">
+    <h4>Media Stream Constraints options</h4>
+    <p>
+      Echo cancellation:
+      <input type="checkbox" id="echoCancellation" />
+    </p>
+  </div>
+
+  <div>
+    <span id="errorMsg"></span>
+  </div>
+</div>
+
+<script type="text/javascript">
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  // JavaScript wrapper function to send HTTP requests using Django's "X-CSRFToken" request header
+  function sendHttpAsync(path, method, body) {
+    let props = {
+      method: method,
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      mode: "same-origin",
+    };
+
+    if (body !== null && body !== undefined) {
+      props.body = JSON.stringify(body);
+    }
+
+    return fetch(path, props)
+      .then((response) => {
+        return response.json().then((result) => {
+          return {
+            ok: response.ok,
+            body: result,
+          };
+        });
+      })
+      .then((resultObj) => {
+        return resultObj;
+      })
+      .catch((error) => {
+        throw error;
+      });
+  }
+  window.onload = function () {
+
+    $("event").on('submit',function(e){
+
+    })
+    const playButton = document.querySelector("button#magic");
+    playButton.addEventListener("click", () => {
+      const formData = new FormData();
+      const formData1 = document.querySelector("#v-register");
+
+      formData.append("name", $( "#id_name" ).val());
+      formData.append("mobile",$( "#id_mobile" ).val()); // number 123456 is immediately converted to a string "123456"
+
+      // HTML file input, chosen by user
+      //formData.append("userfile", fileInputElement.files[0]);
+
+      // JavaScript file-like object
+      const content = '<q id="a"><span id="b">hey!</span></q>'; // the body of the new file…
+      const blob = new Blob(recordedBlobs, { type: "video/webm" });
+      formData.append("file", blob);
+
+      const request = new XMLHttpRequest();
+
+      request.open("POST", "http://127.0.0.1:8000/");
+      let csrfToken = getCookie("csrftoken");
+
+      request.setRequestHeader("X-CSRFToken", csrfToken);
+      request.send(formData);
+      alert('submited')
+      $("#gum").hide();
+    });
+  };
+</script>
+{% endblock %}
